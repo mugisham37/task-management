@@ -1,0 +1,58 @@
+{
+  "name": "task-management-elite",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Elite Task Management System - Full Stack Application",
+  "workspaces": [
+    "client",
+    "server",
+    "shared"
+  ],
+  "scripts": {
+    "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\"",
+    "dev:client": "cd client && npm run dev",
+    "dev:server": "cd server && npm run dev",
+    "build": "npm run build:shared && npm run build:server && npm run build:client",
+    "build:client": "cd client && npm run build",
+    "build:server": "cd server && npm run build",
+    "build:shared": "cd shared && npm run build",
+    "test": "npm run test:server && npm run test:client",
+    "test:server": "cd server && npm test",
+    "test:client": "cd client && npm test",
+    "lint": "npm run lint:server && npm run lint:client && npm run lint:shared",
+    "lint:server": "cd server && npm run lint",
+    "lint:client": "cd client && npm run lint",
+    "lint:shared": "cd shared && npm run lint",
+    "docker:dev": "docker-compose up -d",
+    "docker:prod": "docker-compose -f docker-compose.prod.yml up -d",
+    "docker:down": "docker-compose down",
+    "setup": "npm install && npm run build:shared",
+    "clean": "npm run clean:client && npm run clean:server && npm run clean:shared",
+    "clean:client": "cd client && rm -rf .next node_modules",
+    "clean:server": "cd server && rm -rf dist node_modules",
+    "clean:shared": "cd shared && rm -rf dist node_modules",
+    "postinstall": "husky install"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2",
+    "husky": "^8.0.3",
+    "lint-staged": "^15.2.0",
+    "@commitlint/cli": "^18.4.3",
+    "@commitlint/config-conventional": "^18.4.3"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  },
+  "keywords": [
+    "task-management",
+    "full-stack",
+    "nextjs",
+    "nodejs",
+    "typescript",
+    "mongodb",
+    "redis"
+  ],
+  "author": "Task Management Elite Team",
+  "license": "MIT"
+}
