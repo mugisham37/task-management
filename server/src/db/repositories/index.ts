@@ -10,6 +10,14 @@ export { ProjectRepository, projectRepository } from './project.repository';
 export { WorkspaceRepository, workspaceRepository } from './workspace.repository';
 export { CommentRepository, commentRepository } from './comment.repository';
 export { NotificationRepository, notificationRepository } from './notification.repository';
+export { TeamRepository, teamRepository } from './team.repository';
+export { ActivityRepository, activityRepository } from './activity.repository';
+export { InvitationRepository, invitationRepository } from './invitation.repository';
+export { CalendarEventRepository, calendarEventRepository } from './calendar-event.repository';
+export { CalendarIntegrationRepository, calendarIntegrationRepository } from './calendar-integration.repository';
+export { FeedbackRepository, feedbackRepository } from './feedback.repository';
+export { RecurringTaskRepository, recurringTaskRepository } from './recurring-task.repository';
+export { TaskTemplateRepository, taskTemplateRepository } from './task-template.repository';
 
 // Import repository instances
 import { userRepository } from './user.repository';
@@ -18,6 +26,14 @@ import { projectRepository } from './project.repository';
 import { workspaceRepository } from './workspace.repository';
 import { commentRepository } from './comment.repository';
 import { notificationRepository } from './notification.repository';
+import { teamRepository } from './team.repository';
+import { activityRepository } from './activity.repository';
+import { invitationRepository } from './invitation.repository';
+import { calendarEventRepository } from './calendar-event.repository';
+import { calendarIntegrationRepository } from './calendar-integration.repository';
+import { feedbackRepository } from './feedback.repository';
+import { recurringTaskRepository } from './recurring-task.repository';
+import { taskTemplateRepository } from './task-template.repository';
 
 // Repository instances for easy access
 export const repositories = {
@@ -27,6 +43,14 @@ export const repositories = {
   workspace: workspaceRepository,
   comment: commentRepository,
   notification: notificationRepository,
+  team: teamRepository,
+  activity: activityRepository,
+  invitation: invitationRepository,
+  calendarEvent: calendarEventRepository,
+  calendarIntegration: calendarIntegrationRepository,
+  feedback: feedbackRepository,
+  recurringTask: recurringTaskRepository,
+  taskTemplate: taskTemplateRepository,
 } as const;
 
 // Type exports for repository instances
