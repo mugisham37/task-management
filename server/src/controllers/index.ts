@@ -1,3 +1,6 @@
+// Task Controller
+export * from './task.controller';
+
 // Task Template Controller
 export * from './task-template.controller';
 
@@ -33,3 +36,12 @@ export * from './feedback.controller';
 
 // Monitoring Controller
 export * from './monitoring.controller';
+
+// Invitation Controller
+export * from './invitation.controller';
+
+// Recurring Task Controller
+export * from './recurring-task.controller';
+
+// Workspace Controller
+export * from './workspace.controller';
