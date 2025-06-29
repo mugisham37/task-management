@@ -472,6 +472,145 @@ export class CommentService extends BaseService {
     }
   }
 
+  // Attachment Management
+  async addCommentAttachment(
+    commentId: string,
+    attachmentData: {
+      filename: string;
+      path: string;
+      mimetype: string;
+      size: number;
+    },
+    context?: ServiceContext
+  ): Promise<Comment> {
+    const ctx = this.createContext(context);
+    this.logOperation('addCommentAttachment', ctx, { commentId, filename: attachmentData.filename });
+
+    try {
+      // Validate comment exists and user has access
+      const comment = await this.getCommentById(commentId, ctx);
+      
+      // Validate attachment data
+      this.validateAttachmentData(attachmentData);
+
+      // Create attachment object with unique ID
+      const attachment = {
+        id: this.generateAttachmentId(),
+        filename: attachmentData.filename,
+        path: attachmentData.path,
+        mimetype: attachmentData.mimetype,
+        size: attachmentData.size,
+        uploadedAt: new Date(),
+        uploadedBy: ctx.userId!
+      };
+
+      // Get existing attachments and add new one
+      const existingAttachments = (comment.attachments as any[]) || [];
+      const updatedAttachments = [...existingAttachments, attachment];
+
+      // Update comment with new attachment
+      const updatedComment = await commentRepository.update(commentId, {
+        attachments: updatedAttachments,
+        updatedAt: new Date()
+      });
+
+      if (!updatedComment) {
+        throw new NotFoundError('Comment', commentId);
+      }
+
+      // Log activity
+      await activityService.createActivity({
+        userId: ctx.userId!,
+        type: 'task_commented',
+        taskId: comment.taskId,
+        data: {
+          action: 'attachment_added',
+          commentId,
+          filename: attachmentData.filename,
+          fileSize: attachmentData.size
+        },
+        metadata: {
+          commentId,
+          attachmentId: attachment.id
+        }
+      }, ctx);
+
+      await this.recordMetric('comment.attachment.added', 1, {
+        fileType: attachmentData.mimetype.split('/')[0],
+        fileSize: this.getFileSizeCategory(attachmentData.size)
+      });
+
+      return updatedComment;
+    } catch (error) {
+      this.handleError(error, 'addCommentAttachment', ctx);
+    }
+  }
+
+  async removeCommentAttachment(
+    commentId: string,
+    attachmentId: string,
+    context?: ServiceContext
+  ): Promise<Comment> {
+    const ctx = this.createContext(context);
+    this.logOperation('removeCommentAttachment', ctx, { commentId, attachmentId });
+
+    try {
+      // Validate comment exists and user has access
+      const comment = await this.getCommentById(commentId, ctx);
+      
+      // Get existing attachments
+      const existingAttachments = (comment.attachments as any[]) || [];
+      
+      // Find the attachment to remove
+      const attachmentIndex = existingAttachments.findIndex(att => att.id === attachmentId);
+      if (attachmentIndex === -1) {
+        throw new NotFoundError('Attachment', attachmentId);
+      }
+
+      const attachmentToRemove = existingAttachments[attachmentIndex];
+
+      // Check permissions - only comment author or attachment uploader can remove
+      if (comment.authorId !== ctx.userId && attachmentToRemove.uploadedBy !== ctx.userId && ctx.userRole !== 'admin') {
+        throw new ForbiddenError('Only the comment author, attachment uploader, or admin can remove this attachment');
+      }
+
+      // Remove attachment from array
+      const updatedAttachments = existingAttachments.filter(att => att.id !== attachmentId);
+
+      // Update comment
+      const updatedComment = await commentRepository.update(commentId, {
+        attachments: updatedAttachments,
+        updatedAt: new Date()
+      });
+
+      if (!updatedComment) {
+        throw new NotFoundError('Comment', commentId);
+      }
+
+      // Log activity
+      await activityService.createActivity({
+        userId: ctx.userId!,
+        type: 'task_commented',
+        taskId: comment.taskId,
+        data: {
+          action: 'attachment_removed',
+          commentId,
+          filename: attachmentToRemove.filename
+        },
+        metadata: {
+          commentId,
+          attachmentId
+        }
+      }, ctx);
+
+      await this.recordMetric('comment.attachment.removed', 1);
+
+      return updatedComment;
+    } catch (error) {
+      this.handleError(error, 'removeCommentAttachment', ctx);
+    }
+  }
+
   // Statistics
   async getCommentStats(
     taskId?: string,
@@ -760,6 +899,67 @@ export class CommentService extends BaseService {
     }
 
     return mostCommented;
+  }
+
+  // Attachment Helper Methods
+  private validateAttachmentData(attachmentData: {
+    filename: string;
+    path: string;
+    mimetype: string;
+    size: number;
+  }): void {
+    if (!attachmentData.filename || attachmentData.filename.trim().length === 0) {
+      throw new ValidationError('Attachment filename is required');
+    }
+
+    if (!attachmentData.path || attachmentData.path.trim().length === 0) {
+      throw new ValidationError('Attachment path is required');
+    }
+
+    if (!attachmentData.mimetype || attachmentData.mimetype.trim().length === 0) {
+      throw new ValidationError('Attachment mimetype is required');
+    }
+
+    if (!attachmentData.size || attachmentData.size <= 0) {
+      throw new ValidationError('Attachment size must be greater than 0');
+    }
+
+    // File size limit (50MB)
+    const maxFileSize = 50 * 1024 * 1024; // 50MB in bytes
+    if (attachmentData.size > maxFileSize) {
+      throw new ValidationError('Attachment size cannot exceed 50MB');
+    }
+
+    // Validate filename length
+    if (attachmentData.filename.length > 255) {
+      throw new ValidationError('Attachment filename cannot exceed 255 characters');
+    }
+
+    // Basic security check for filename
+    const dangerousChars = /[<>:"/\\|?*\x00-\x1f]/;
+    if (dangerousChars.test(attachmentData.filename)) {
+      throw new ValidationError('Attachment filename contains invalid characters');
+    }
+  }
+
+  private generateAttachmentId(): string {
+    // Generate a unique ID for the attachment
+    // Using timestamp + random string for uniqueness
+    const timestamp = Date.now().toString(36);
+    const randomStr = Math.random().toString(36).substring(2, 15);
+    return `att_${timestamp}_${randomStr}`;
+  }
+
+  private getFileSizeCategory(size: number): string {
+    if (size < 1024) {
+      return 'bytes';
+    } else if (size < 1024 * 1024) {
+      return 'kb';
+    } else if (size < 1024 * 1024 * 1024) {
+      return 'mb';
+    } else {
+      return 'gb';
+    }
   }
 }
 

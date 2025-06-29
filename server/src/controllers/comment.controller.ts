@@ -4,7 +4,7 @@ import { successResponse } from "../utils/response-formatter"
 import { commentService } from "../services"
 import type { AuthRequest } from "../middleware/auth.middleware"
 import type { Express } from "express"
-import { ValidationError } from "../utils/app-error"
+import { ValidationError } from "../services/base.service"
 
 /**
  * @desc    Create a new comment on a task
