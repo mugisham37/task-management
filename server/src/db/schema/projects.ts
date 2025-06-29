@@ -1,4 +1,4 @@
-import { pgTable, uuid, varchar, text, boolean, timestamp } from 'drizzle-orm/pg-core';
+import { pgTable, uuid, varchar, text, boolean, timestamp, integer, index } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
 import { createInsertSchema, createSelectSchema } from 'drizzle-zod';
 import { z } from 'zod';
@@ -12,9 +12,18 @@ export const projects = pgTable('projects', {
   color: varchar('color', { length: 7 }).notNull().default('#3B82F6'),
   ownerId: uuid('owner_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
   isArchived: boolean('is_archived').notNull().default(false),
+  version: integer('version').notNull().default(1), // Optimistic locking
+  deletedAt: timestamp('deleted_at'), // Soft delete
   createdAt: timestamp('created_at').notNull().defaultNow(),
   updatedAt: timestamp('updated_at').notNull().defaultNow(),
-});
+}, (table) => ({
+  nameIdx: index('projects_name_idx').on(table.name),
+  ownerIdx: index('projects_owner_idx').on(table.ownerId),
+  archivedIdx: index('projects_archived_idx').on(table.isArchived),
+  ownerArchivedIdx: index('projects_owner_archived_idx').on(table.ownerId, table.isArchived),
+  deletedAtIdx: index('projects_deleted_at_idx').on(table.deletedAt),
+  createdAtIdx: index('projects_created_at_idx').on(table.createdAt),
+}));
 
 export const projectMembers = pgTable('project_members', {
   id: uuid('id').defaultRandom().primaryKey(),

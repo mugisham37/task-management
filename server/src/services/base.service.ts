@@ -1,5 +1,5 @@
 import { eq, desc, asc, count } from 'drizzle-orm';
-import { db } from '../connection';
+import { db } from '../db/connection';
 
 export interface PaginationOptions {
   page?: number;

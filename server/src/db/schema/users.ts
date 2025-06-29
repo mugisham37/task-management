@@ -1,4 +1,4 @@
-import { pgTable, uuid, varchar, text, boolean, timestamp, jsonb } from 'drizzle-orm/pg-core';
+import { pgTable, uuid, varchar, text, boolean, timestamp, jsonb, integer, index } from 'drizzle-orm/pg-core';
 import { createInsertSchema, createSelectSchema } from 'drizzle-zod';
 import { z } from 'zod';
 
@@ -21,9 +21,20 @@ export const users = pgTable('users', {
     language: 'en'
   }),
   lastLoginAt: timestamp('last_login_at'),
+  version: integer('version').notNull().default(1), // Optimistic locking
+  deletedAt: timestamp('deleted_at'), // Soft delete
   createdAt: timestamp('created_at').notNull().defaultNow(),
   updatedAt: timestamp('updated_at').notNull().defaultNow(),
-});
+}, (table) => ({
+  emailIdx: index('users_email_idx').on(table.email),
+  usernameIdx: index('users_username_idx').on(table.username),
+  roleIdx: index('users_role_idx').on(table.role),
+  emailVerifiedIdx: index('users_email_verified_idx').on(table.isEmailVerified),
+  lastLoginIdx: index('users_last_login_idx').on(table.lastLoginAt),
+  deletedAtIdx: index('users_deleted_at_idx').on(table.deletedAt),
+  fullNameIdx: index('users_full_name_idx').on(table.firstName, table.lastName),
+  createdAtIdx: index('users_created_at_idx').on(table.createdAt),
+}));
 
 export const insertUserSchema = createInsertSchema(users, {
   email: z.string().email(),

@@ -1,6 +1,6 @@
 import { eq, and, desc, count, ilike } from 'drizzle-orm';
 import { db, PaginationOptions, PaginatedResult } from './base.service';
-import { users, User, NewUser } from '../schema/users';
+import { users, User, NewUser } from '../db/schema/users';
 
 export class UserService {
   async findById(id: string): Promise<User | null> {

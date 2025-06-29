@@ -136,21 +136,38 @@ export abstract class BaseRepository<TSelect, TInsert> implements IBaseRepositor
     }
   }
 
-  async update(id: string, data: Partial<TInsert>): Promise<TSelect | null> {
+  async update(id: string, data: Partial<TInsert>, expectedVersion?: number): Promise<TSelect | null> {
     try {
       const updateData = {
         ...data,
         updatedAt: new Date()
       } as any;
 
+      // Handle optimistic locking
+      if (expectedVersion !== undefined && (this.table as any).version) {
+        updateData.version = expectedVersion + 1;
+      }
+
       const primaryKeyColumn = (this.table as any)[this.primaryKey];
+      let whereCondition: SQL = eq(primaryKeyColumn, id);
+
+      // Add version check for optimistic locking
+      if (expectedVersion !== undefined && (this.table as any).version) {
+        const versionColumn = (this.table as any).version;
+        whereCondition = and(whereCondition, eq(versionColumn, expectedVersion)) as SQL;
+      }
+
       const result = await db
         .update(this.table)
         .set(updateData)
-        .where(eq(primaryKeyColumn, id))
+        .where(whereCondition)
         .returning();
       
       const updated = (result[0] as TSelect) || null;
+      
+      if (!updated && expectedVersion !== undefined) {
+        throw new RepositoryException('VALIDATION_ERROR', 'Optimistic locking failed - record was modified by another user');
+      }
       
       if (updated && this.auditConfig.enabled) {
         await this.logAudit('UPDATE', updated, data);
