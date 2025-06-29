@@ -6,6 +6,7 @@ import { PaginationOptions, PaginatedResult } from '../db/repositories/base/inte
 
 export interface ProjectFilters {
   ownerId?: string;
+  status?: 'planning' | 'active' | 'on_hold' | 'completed' | 'cancelled';
   isArchived?: boolean;
   search?: string;
   createdFrom?: Date;
@@ -16,6 +17,7 @@ export interface ProjectCreateData {
   name: string;
   description?: string;
   color?: string;
+  status?: 'planning' | 'active' | 'on_hold' | 'completed' | 'cancelled';
   isArchived?: boolean;
 }
 
@@ -24,6 +26,7 @@ export interface ProjectUpdateData {
   description?: string;
   color?: string;
   icon?: string;
+  status?: 'planning' | 'active' | 'on_hold' | 'completed' | 'cancelled';
   isArchived?: boolean;
 }
 
@@ -314,6 +317,67 @@ export class ProjectService extends BaseService {
     return eq(projectRepository['table']?.ownerId, userId);
   }
 
+  // Status Management Methods
+  async startProject(id: string, context?: ServiceContext): Promise<Project> {
+    const ctx = this.createContext(context);
+    this.logOperation('startProject', ctx, { projectId: id });
+
+    try {
+      const updatedProject = await this.updateProject(id, { status: 'active' }, ctx);
+      
+      await this.recordMetric('project.started', 1);
+      
+      return updatedProject;
+    } catch (error) {
+      this.handleError(error, 'startProject', ctx);
+    }
+  }
+
+  async pauseProject(id: string, context?: ServiceContext): Promise<Project> {
+    const ctx = this.createContext(context);
+    this.logOperation('pauseProject', ctx, { projectId: id });
+
+    try {
+      const updatedProject = await this.updateProject(id, { status: 'on_hold' }, ctx);
+      
+      await this.recordMetric('project.paused', 1);
+      
+      return updatedProject;
+    } catch (error) {
+      this.handleError(error, 'pauseProject', ctx);
+    }
+  }
+
+  async completeProject(id: string, context?: ServiceContext): Promise<Project> {
+    const ctx = this.createContext(context);
+    this.logOperation('completeProject', ctx, { projectId: id });
+
+    try {
+      const updatedProject = await this.updateProject(id, { status: 'completed' }, ctx);
+      
+      await this.recordMetric('project.completed', 1);
+      
+      return updatedProject;
+    } catch (error) {
+      this.handleError(error, 'completeProject', ctx);
+    }
+  }
+
+  async cancelProject(id: string, context?: ServiceContext): Promise<Project> {
+    const ctx = this.createContext(context);
+    this.logOperation('cancelProject', ctx, { projectId: id });
+
+    try {
+      const updatedProject = await this.updateProject(id, { status: 'cancelled' }, ctx);
+      
+      await this.recordMetric('project.cancelled', 1);
+      
+      return updatedProject;
+    } catch (error) {
+      this.handleError(error, 'cancelProject', ctx);
+    }
+  }
+
   private validateProjectData(data: ProjectCreateData): void {
     if (!data.name || data.name.trim().length === 0) {
       throw new ValidationError('Project name is required');
@@ -329,6 +393,10 @@ export class ProjectService extends BaseService {
 
     if (data.color && !/^#[0-9A-F]{6}$/i.test(data.color)) {
       throw new ValidationError('Project color must be a valid hex color code');
+    }
+
+    if (data.status && !['planning', 'active', 'on_hold', 'completed', 'cancelled'].includes(data.status)) {
+      throw new ValidationError('Invalid project status');
     }
   }
 
@@ -348,6 +416,10 @@ export class ProjectService extends BaseService {
 
     if (data.color && !/^#[0-9A-F]{6}$/i.test(data.color)) {
       throw new ValidationError('Project color must be a valid hex color code');
+    }
+
+    if (data.status && !['planning', 'active', 'on_hold', 'completed', 'cancelled'].includes(data.status)) {
+      throw new ValidationError('Invalid project status');
     }
   }
 }
