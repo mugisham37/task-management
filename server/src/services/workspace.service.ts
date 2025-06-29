@@ -394,13 +394,11 @@ export class WorkspaceService extends BaseService {
       // Check if user has access to the workspace
       const workspace = await this.getWorkspaceById(workspaceId, ctx);
 
-      // Get projects in workspace
-      const projects = await projectRepository.findMany({
-        where: eq(projectRepository['table']?.workspaceId, workspaceId),
-        limit: 1000
-      });
+      // Note: Projects table doesn't have workspaceId column yet
+      // For now, return empty projects array until the relationship is implemented
+      const projects = { data: [] as any[] };
 
-      const projectIds = projects.data.map(project => project.id);
+      const projectIds: string[] = [];
 
       // Get tasks in workspace projects
       let totalTasks = 0;

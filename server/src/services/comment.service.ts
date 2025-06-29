@@ -14,7 +14,6 @@ import { activityService } from './activity.service';
 
 export interface CommentFilters {
   taskId?: string;
-  projectId?: string;
   userId?: string;
   createdFrom?: Date;
   createdTo?: Date;
@@ -23,8 +22,7 @@ export interface CommentFilters {
 
 export interface CommentCreateData {
   content: string;
-  taskId?: string;
-  projectId?: string;
+  taskId: string;
   parentId?: string;
   mentions?: string[];
   attachments?: Array<{
@@ -86,7 +84,6 @@ export class CommentService extends BaseService {
     this.logOperation('createComment', ctx, { 
       content: data.content.substring(0, 100),
       taskId: data.taskId,
-      projectId: data.projectId,
       mentionCount: data.mentions?.length || 0
     });
 
@@ -94,18 +91,12 @@ export class CommentService extends BaseService {
       // Validate input
       this.validateCommentData(data);
 
-      // Verify task or project access
-      if (data.taskId) {
-        await this.verifyTaskAccess(data.taskId, ctx.userId!);
-      } else if (data.projectId) {
-        await this.verifyProjectAccess(data.projectId, ctx.userId!);
-      } else {
-        throw new ValidationError('Either taskId or projectId must be provided');
-      }
+      // Verify task access
+      await this.verifyTaskAccess(data.taskId, ctx.userId!);
 
       // Verify parent comment exists if specified
       if (data.parentId) {
-        await this.verifyParentComment(data.parentId, data.taskId, data.projectId);
+        await this.verifyParentComment(data.parentId, data.taskId);
       }
 
       // Extract and validate mentions
@@ -136,7 +127,6 @@ export class CommentService extends BaseService {
         userId: ctx.userId!,
         type: 'task_commented',
         taskId: data.taskId,
-        projectId: data.projectId,
         data: {
           action: 'comment_created',
           commentId: comment.id,
@@ -151,7 +141,6 @@ export class CommentService extends BaseService {
 
       await this.recordMetric('comment.created', 1, { 
         hasTaskId: data.taskId ? 'true' : 'false',
-        hasProjectId: data.projectId ? 'true' : 'false',
         hasMentions: mentions.length > 0 ? 'true' : 'false',
         hasAttachments: (data.attachments?.length || 0) > 0 ? 'true' : 'false',
         isReply: data.parentId ? 'true' : 'false'
@@ -250,9 +239,31 @@ export class CommentService extends BaseService {
 
       const paginationOptions = this.validatePagination(options);
       
+      // Get all tasks in the project first
+      const tasks = await taskRepository.findMany({
+        where: eq(taskRepository['table']?.projectId, projectId),
+        limit: 10000
+      });
+
+      const taskIds = tasks.data.map(task => task.id);
+
+      if (taskIds.length === 0) {
+        return {
+          data: [],
+          pagination: {
+            page: paginationOptions.page,
+            limit: paginationOptions.limit,
+            total: 0,
+            totalPages: 0,
+            hasNext: false,
+            hasPrev: false
+          }
+        };
+      }
+
       const result = await commentRepository.findMany({
         ...paginationOptions,
-        where: eq(commentRepository['table']?.projectId, projectId),
+        where: inArray(commentRepository['table']?.taskId, taskIds),
         sortBy: 'createdAt',
         sortOrder: 'desc' // Most recent first for project comments
       });
@@ -274,7 +285,7 @@ export class CommentService extends BaseService {
       }
 
       // Check permissions - only author can update
-      if (existingComment.userId !== ctx.userId) {
+      if (existingComment.authorId !== ctx.userId) {
         throw new ForbiddenError('Only the comment author can update this comment');
       }
 
@@ -587,8 +598,8 @@ export class CommentService extends BaseService {
       throw new ValidationError('Comment content must be less than 2000 characters');
     }
 
-    if (!data.taskId && !data.projectId) {
-      throw new ValidationError('Either taskId or projectId must be provided');
+    if (!data.taskId) {
+      throw new ValidationError('taskId must be provided');
     }
   }
 

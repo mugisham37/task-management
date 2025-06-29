@@ -28,6 +28,9 @@ export const activityTypeEnum = [
   'team_member_added',
   'team_member_removed',
   'team_member_role_changed',
+  'calendar_event_created',
+  'calendar_event_updated',
+  'calendar_event_deleted',
 ] as const;
 
 export const activities = pgTable('activities', {

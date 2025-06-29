@@ -18,6 +18,8 @@ export const notificationTypeEnum = [
   'calendar_reminder',
   'system_announcement',
   'system_maintenance',
+  'system',
+  'reminder',
 ] as const;
 
 export const notifications = pgTable('notifications', {

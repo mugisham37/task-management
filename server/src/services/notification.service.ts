@@ -9,8 +9,10 @@ export enum NotificationType {
   TASK_DUE_SOON = 'task_due_soon',
   TASK_OVERDUE = 'task_overdue',
   TASK_COMPLETED = 'task_completed',
+  TASK_COMMENTED = 'task_commented',
   PROJECT_SHARED = 'project_shared',
   TEAM_INVITATION = 'team_invitation',
+  CALENDAR_REMINDER = 'calendar_reminder',
   SYSTEM = 'system',
   REMINDER = 'reminder'
 }

@@ -156,9 +156,9 @@ export class TaskTemplateService extends BaseService {
       await activityService.createActivity({
         userId: ctx.userId!,
         type: 'task_created',
-        workspaceId: data.workspaceId,
-        teamId: data.teamId,
-        projectId: data.projectId,
+        workspaceId: data.workspaceId || undefined,
+        teamId: data.teamId || undefined,
+        projectId: data.projectId || undefined,
         data: {
           action: 'task_template_created',
           templateId: template.id,
@@ -372,9 +372,9 @@ export class TaskTemplateService extends BaseService {
       // Create task data from template
       const taskData = {
         ...(template.taskData as any),
-        projectId: options.projectId || template.projectId || undefined,
-        assigneeId: options.assigneeId || undefined,
-        dueDate: options.dueDate || undefined,
+        projectId: options.projectId ?? (template.projectId === null ? undefined : template.projectId),
+        assigneeId: options.assigneeId ?? undefined,
+        dueDate: options.dueDate ?? undefined,
         ...options.customData
       };
 
@@ -386,7 +386,7 @@ export class TaskTemplateService extends BaseService {
         userId: ctx.userId!,
         type: 'task_created',
         taskId: task.id,
-        projectId: task.projectId,
+        projectId: task.projectId || undefined,
         data: {
           action: 'task_created_from_template',
           templateId: template.id,

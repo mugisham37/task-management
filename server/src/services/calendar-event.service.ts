@@ -709,7 +709,7 @@ export class CalendarEventService extends BaseService {
     }
   }
 
-  private async validateAttendees(attendeeIds: string[]): void {
+  private async validateAttendees(attendeeIds: string[]): Promise<void> {
     for (const attendeeId of attendeeIds) {
       const user = await userRepository.findById(attendeeId);
       if (!user) {
