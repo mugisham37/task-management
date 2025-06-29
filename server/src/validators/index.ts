@@ -23,6 +23,30 @@ export * as commentValidators from './comment.validator';
 // Feedback validators
 export * as feedbackValidators from './feedback.validator';
 
+// Invitation validators
+export * as invitationValidators from './invitation.validator';
+
+// Notification validators
+export * as notificationValidators from './notification.validator';
+
+// Project validators
+export * as projectValidators from './project.validator';
+
+// Recurring task validators
+export * as recurringTaskValidators from './recurring-task.validator';
+
+// Task validators
+export * as taskValidators from './task.validator';
+
+// Task template validators
+export * as taskTemplateValidators from './task-template.validator';
+
+// Team validators
+export * as teamValidators from './team.validator';
+
+// Workspace validators
+export * as workspaceValidators from './workspace.validator';
+
 // Re-export individual validators for convenience
 export {
   // Activity validators
@@ -100,6 +124,114 @@ export {
   getFeedbackStats,
   bulkUpdateFeedback,
 } from './feedback.validator';
+
+export {
+  // Invitation validators
+  createInvitation,
+  getTeamInvitations,
+  getInvitationByToken,
+  acceptInvitation,
+  declineInvitation,
+  cancelInvitation,
+  resendInvitation,
+} from './invitation.validator';
+
+export {
+  // Notification validators
+  getNotifications,
+  markNotificationAsRead,
+  markAllNotificationsAsRead,
+  deleteNotification,
+} from './notification.validator';
+
+export {
+  // Project validators
+  createProject,
+  updateProject,
+  getProject,
+  deleteProject,
+  getProjects,
+} from './project.validator';
+
+export {
+  // Recurring task validators
+  createRecurringTaskSchema,
+  updateRecurringTaskSchema,
+} from './recurring-task.validator';
+
+export {
+  // Task validators
+  createTask,
+  updateTask,
+  getTask,
+  deleteTask,
+  getTasks,
+  bulkUpdateTasks,
+  addTaskAttachment,
+  removeTaskAttachment,
+  updateTaskStatus,
+  assignTask,
+  unassignTask,
+  addTaskComment,
+  getTaskComments,
+  addTaskTag,
+  removeTaskTag,
+  duplicateTask,
+  moveTask,
+  getTaskStats,
+  getTaskHistory,
+  restoreTask,
+  archiveTask,
+} from './task.validator';
+
+export {
+  // Task template validators
+  createTaskTemplateSchema,
+  updateTaskTemplateSchema,
+  createTaskFromTemplateSchema,
+} from './task-template.validator';
+
+export {
+  // Team validators
+  createTeam,
+  updateTeam,
+  getTeam,
+  deleteTeam,
+  getTeams,
+  addTeamMember,
+  removeTeamMember,
+  updateTeamMemberRole,
+  leaveTeam,
+  transferTeamOwnership,
+  getTeamStats,
+  getTeamMembers,
+  archiveTeam,
+  restoreTeam,
+  bulkUpdateTeams,
+  duplicateTeam,
+} from './team.validator';
+
+export {
+  // Workspace validators
+  createWorkspace,
+  updateWorkspace,
+  getWorkspace,
+  deleteWorkspace,
+  getWorkspaces,
+  getWorkspaceProjects,
+  getWorkspaceTasks,
+  createPersonalWorkspace,
+  getPersonalWorkspace,
+  getWorkspaceStats,
+  archiveWorkspace,
+  restoreWorkspace,
+  transferWorkspaceOwnership,
+  bulkUpdateWorkspaces,
+  duplicateWorkspace,
+  addWorkspaceMember,
+  removeWorkspaceMember,
+  updateWorkspaceMemberRole,
+} from './workspace.validator';
 
 // Common validation utilities re-export
 export {
