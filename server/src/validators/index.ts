@@ -41,6 +41,8 @@ export * as recurringTaskValidators from './recurring-task.validator';
 // Task validators
 export * as taskValidators from './task.validator';
 
+// Task template validators
+export * as taskTemplateValidators from './task-template.validator';
 
 // Team validators
 export * as teamValidators from './team.validator';
