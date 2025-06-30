@@ -2,6 +2,7 @@ import type { SQL } from 'drizzle-orm'
 import { and, or, eq, ne, gt, gte, lt, lte, inArray, notInArray, like, ilike, between, desc, asc, count } from 'drizzle-orm'
 import type { PgTable, PgColumn } from 'drizzle-orm/pg-core'
 import type { PgSelect } from 'drizzle-orm/pg-core'
+import { safeAnd, safeOr, ensureSQLOrNull, filterValidSQL, type OptionalSQL } from '../types/sql-types'
 
 /**
  * API Features class for handling filtering, sorting, pagination with Drizzle ORM
@@ -103,7 +104,10 @@ export class APIFeatures<T extends PgTable> {
             tagConditions.push(like(tagsColumn, `%${tag}%`))
           })
           if (tagConditions.length > 0) {
-            conditions.push(tagConditions.length === 1 ? tagConditions[0] : or(...tagConditions))
+            const safeTagCondition = safeOr(...tagConditions)
+            if (safeTagCondition) {
+              conditions.push(safeTagCondition)
+            }
           }
         } catch (error) {
           // Skip invalid tag conditions
@@ -240,12 +244,16 @@ export class APIFeatures<T extends PgTable> {
       })
 
       if (searchConditions.length > 0) {
-        const searchCondition = searchConditions.length === 1 ? searchConditions[0] : or(...searchConditions)
-        this.whereConditions.push(searchCondition)
-        
-        // Rebuild query with all conditions
-        const allConditions = this.whereConditions.length === 1 ? this.whereConditions[0] : and(...this.whereConditions)
-        this.query = this.db.select().from(this.table).where(allConditions)
+        const searchCondition = safeOr(...searchConditions)
+        if (searchCondition) {
+          this.whereConditions.push(searchCondition)
+          
+          // Rebuild query with all conditions
+          const allConditions = safeAnd(...this.whereConditions)
+          if (allConditions) {
+            this.query = this.db.select().from(this.table).where(allConditions)
+          }
+        }
       }
     }
 
@@ -404,7 +412,7 @@ export const queryHelpers = {
       const searchConditions = columns.map(column => 
         ilike(column, `%${searchTerm}%`)
       )
-      return searchConditions.length === 1 ? searchConditions[0] : or(...searchConditions)
+      return safeOr(...searchConditions)
     } catch (error) {
       return null
     }
