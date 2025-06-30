@@ -6,9 +6,14 @@ import logger from "../config/logger";
 import type { Request, Response, NextFunction } from "express";
 import { TooManyRequestsError } from "../utils/app-error";
 
-// Parse rate limit configuration from environment variables
-const RATE_LIMIT_WINDOW_MS = Number.parseInt(config.rateLimitWindowMs || "900000", 10); // Default: 15 minutes
-const RATE_LIMIT_MAX = Number.parseInt(config.rateLimitMax || "100", 10); // Default: 100 requests per window
+// Parse rate limit configuration from environment variables with proper type handling
+const RATE_LIMIT_WINDOW_MS = typeof config.rateLimitWindowMs === 'string' 
+  ? Number.parseInt(config.rateLimitWindowMs, 10)
+  : config.rateLimitWindowMs || 900000; // Default: 15 minutes
+
+const RATE_LIMIT_MAX = typeof config.rateLimitMax === 'string'
+  ? Number.parseInt(config.rateLimitMax, 10) 
+  : config.rateLimitMax || 100; // Default: 100 requests per window
 
 // Create Redis client for rate limiting if Redis URL is provided
 let redisClient: any;
@@ -85,8 +90,12 @@ export const apiLimiter = rateLimit({
  * Strict rate limiter for authentication endpoints
  */
 export const authLimiter = rateLimit({
-  windowMs: Number.parseInt(config.authRateLimitWindowMs || "900000", 10), // 15 minutes
-  max: Number.parseInt(config.authRateLimitMax || "5", 10), // 5 requests per window
+  windowMs: typeof config.authRateLimitWindowMs === 'string' 
+    ? Number.parseInt(config.authRateLimitWindowMs, 10) 
+    : Number.parseInt(config.authRateLimitWindowMs || "900000", 10), // 15 minutes
+  max: typeof config.authRateLimitMax === 'string'
+    ? Number.parseInt(config.authRateLimitMax, 10)
+    : Number.parseInt(config.authRateLimitMax || "5", 10), // 5 requests per window
   standardHeaders: true,
   legacyHeaders: false,
   store: store || undefined,

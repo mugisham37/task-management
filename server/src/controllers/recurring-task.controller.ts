@@ -2,7 +2,7 @@ import type { Request, Response } from "express"
 import { asyncHandler } from "../utils/async-handler"
 import { responseFormatter } from "../utils/response-formatter"
 import { recurringTaskService } from "../services"
-import type { AuthRequest } from "../middleware/auth.middleware"
+import type { AuthRequest } from "../middleware/auth"
 
 /**
  * Create a new recurring task

@@ -5,7 +5,7 @@ import multer from "multer"
 import { asyncHandler } from "../utils/async-handler"
 import { successResponse } from "../utils/response-formatter"
 import { dataImportExportService } from "../services"
-import type { AuthRequest } from "../middleware/auth.middleware"
+import type { AuthRequest } from "../middleware/auth"
 import { ValidationError } from "../services/base.service"
 
 // Configure multer storage

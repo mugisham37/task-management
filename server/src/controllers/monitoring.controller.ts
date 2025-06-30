@@ -2,7 +2,7 @@ import type { Request, Response } from "express"
 import { asyncHandler } from "../utils/async-handler"
 import { successResponse } from "../utils/response-formatter"
 import { systemMonitoringService } from "../services"
-import type { AuthRequest } from "../middleware/auth.middleware"
+import type { AuthRequest } from "../middleware/auth"
 import os from "os"
 
 /**

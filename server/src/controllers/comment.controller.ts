@@ -2,7 +2,7 @@ import type { Response, NextFunction } from "express"
 import { asyncHandler } from "../utils/async-handler"
 import { successResponse } from "../utils/response-formatter"
 import { commentService } from "../services"
-import type { AuthRequest } from "../middleware/auth.middleware"
+import type { AuthRequest } from "../middleware/auth"
 import type { Express } from "express"
 import { ValidationError } from "../services/base.service"
 

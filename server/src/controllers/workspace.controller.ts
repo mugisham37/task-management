@@ -2,7 +2,7 @@ import type { Response, NextFunction } from "express"
 import { asyncHandler } from "../utils/async-handler"
 import { successResponse } from "../utils/response-formatter"
 import { workspaceService } from "../services"
-import type { AuthRequest } from "../middleware/auth.middleware"
+import type { AuthRequest } from "../middleware/auth"
 
 /**
  * @desc    Get all workspaces for the authenticated user
