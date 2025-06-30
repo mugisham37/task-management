@@ -222,81 +222,40 @@ export const changePassword = [
  * Validation rules for updating user profile
  */
 export const updateProfile = [
-  body("firstName")
+  body("name")
     .optional()
     .isString()
-    .withMessage("First name must be a string")
-    .trim()
-    .isLength({ min: 1, max: 100 })
-    .withMessage("First name must be between 1 and 100 characters")
-    .matches(/^[a-zA-Z\s'-]+$/)
-    .withMessage("First name can only contain letters, spaces, hyphens, and apostrophes"),
+    .withMessage("Name must be a string")
+    .isLength({ min: 2, max: 50 })
+    .withMessage("Name must be between 2 and 50 characters"),
 
-  body("lastName")
-    .optional()
-    .isString()
-    .withMessage("Last name must be a string")
-    .trim()
-    .isLength({ min: 1, max: 100 })
-    .withMessage("Last name must be between 1 and 100 characters")
-    .matches(/^[a-zA-Z\s'-]+$/)
-    .withMessage("Last name can only contain letters, spaces, hyphens, and apostrophes"),
+  body("email").optional().isEmail().withMessage("Invalid email format").normalizeEmail(),
 
-  body("username")
+  body("currentPassword").optional().isString().withMessage("Current password must be a string"),
+
+  body("newPassword")
     .optional()
-    .isString()
-    .withMessage("Username must be a string")
-    .trim()
-    .isLength({ min: 3, max: 50 })
-    .withMessage("Username must be between 3 and 50 characters")
-    .matches(/^[a-zA-Z0-9_-]+$/)
-    .withMessage("Username can only contain letters, numbers, underscores, and hyphens")
-    .custom((value) => {
-      if (value && (value.startsWith('_') || value.startsWith('-') || value.endsWith('_') || value.endsWith('-'))) {
-        throw new Error("Username cannot start or end with underscores or hyphens");
+    .isLength({ min: 8 })
+    .withMessage("New password must be at least 8 characters")
+    .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/)
+    .withMessage(
+      "New password must contain at least one uppercase letter, one lowercase letter, one number, and one special character",
+    )
+    .custom((value, { req }) => {
+      // If newPassword is provided, currentPassword must also be provided
+      if (value && !req.body.currentPassword) {
+        throw new Error("Current password is required to set a new password")
       }
-      return true;
+      return true
     }),
+]
 
-  validateEmail("email", false),
-
-  body("avatar")
-    .optional()
-    .isURL({
-      protocols: ["http", "https"],
-      require_protocol: true,
-    })
-    .withMessage("Avatar must be a valid URL"),
-
-  body("preferences")
-    .optional()
-    .isObject()
-    .withMessage("Preferences must be an object")
-    .custom((value) => {
-      if (value) {
-        const allowedKeys = ["theme", "notifications", "language"];
-        const providedKeys = Object.keys(value);
-        const invalidKeys = providedKeys.filter(key => !allowedKeys.includes(key));
-        
-        if (invalidKeys.length > 0) {
-          throw new Error(`Invalid preference keys: ${invalidKeys.join(", ")}`);
-        }
-
-        if (value.theme && !["light", "dark", "system"].includes(value.theme)) {
-          throw new Error("Theme must be 'light', 'dark', or 'system'");
-        }
-
-        if (value.notifications !== undefined && typeof value.notifications !== "boolean") {
-          throw new Error("Notifications preference must be a boolean");
-        }
-
-        if (value.language && typeof value.language !== "string") {
-          throw new Error("Language preference must be a string");
-        }
-      }
-      return true;
-    }),
-];
+/**
+ * Validation rules for deleting user profile
+ */
+export const deleteProfile = [
+  body("password").notEmpty().withMessage("Password is required").isString().withMessage("Password must be a string"),
+]
 
 /**
  * Validation rules for logout

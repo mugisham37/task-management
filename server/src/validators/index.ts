@@ -38,8 +38,6 @@ export * as recurringTaskValidators from './recurring-task.validator';
 // Task validators
 export * as taskValidators from './task.validator';
 
-// Task template validators
-export * as taskTemplateValidators from './task-template.validator';
 
 // Team validators
 export * as teamValidators from './team.validator';
@@ -72,6 +70,7 @@ export {
   resendEmailVerification,
   changePassword,
   updateProfile,
+  deleteProfile,
   logout,
   logoutAll,
   checkUsernameAvailability,
@@ -155,8 +154,19 @@ export {
 
 export {
   // Recurring task validators
-  createRecurringTaskSchema,
-  updateRecurringTaskSchema,
+  createRecurringTask,
+  updateRecurringTask,
+  getRecurringTask,
+  deleteRecurringTask,
+  getRecurringTasks,
+  toggleRecurringTaskActive,
+  getRecurringTaskStats,
+  processRecurringTasks,
+  duplicateRecurringTask,
+  bulkUpdateRecurringTasks,
+  getNextOccurrences,
+  pauseRecurringTask,
+  resumeRecurringTask,
 } from './recurring-task.validator';
 
 export {
@@ -166,30 +176,18 @@ export {
   getTask,
   deleteTask,
   getTasks,
-  bulkUpdateTasks,
-  addTaskAttachment,
-  removeTaskAttachment,
+  getTaskStats,
   updateTaskStatus,
   assignTask,
-  unassignTask,
-  addTaskComment,
-  getTaskComments,
-  addTaskTag,
-  removeTaskTag,
+  bulkUpdateTasks,
   duplicateTask,
-  moveTask,
-  getTaskStats,
-  getTaskHistory,
-  restoreTask,
-  archiveTask,
+  addTaskAttachment,
+  removeTaskAttachment,
+  updateTaskChecklist,
+  addTaskDependencies,
+  removeTaskDependencies,
 } from './task.validator';
 
-export {
-  // Task template validators
-  createTaskTemplateSchema,
-  updateTaskTemplateSchema,
-  createTaskFromTemplateSchema,
-} from './task-template.validator';
 
 export {
   // Team validators
