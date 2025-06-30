@@ -14,6 +14,8 @@ interface EnvironmentConfig {
 
   // JWT Configuration
   jwtSecret: string;
+  jwtExpiresIn: string;
+  jwtRefreshExpiresIn: string;
 
   // Redis Configuration
   redisUrl?: string;
@@ -32,14 +34,38 @@ interface EnvironmentConfig {
   logLevel: string;
 
   // Rate Limiting Configuration
-  rateLimitWindowMs: number;
-  rateLimitMaxRequests: number;
+  rateLimitWindowMs: string;
+  rateLimitMax: string;
+  rateLimitSkipSuccessful: string;
+  skipRateLimitInDev: string;
+
+  // Auth Rate Limiting
+  authRateLimitWindowMs: string;
+  authRateLimitMax: string;
 
   // Session Configuration
   sessionSecret: string;
 
   // CORS Configuration
+  corsOrigin: string;
   allowedOrigins: string[];
+
+  // Security Configuration
+  enableHelmet: string;
+  enableCors: string;
+  trustProxy: string;
+
+  // API Versioning
+  defaultApiVersion: string;
+  supportedApiVersions: string[];
+
+  // Internationalization
+  defaultLanguage: string;
+  supportedLanguages: string[];
+
+  // Audit Configuration
+  enableAuditLog: string;
+  auditLogRetentionDays: number;
 
   // Job Configuration
   enableJobs: string;
@@ -62,6 +88,8 @@ const config: EnvironmentConfig = {
 
   // JWT Configuration
   jwtSecret: process.env.JWT_SECRET || 'your-super-secret-jwt-key-change-this-in-production',
+  jwtExpiresIn: process.env.JWT_EXPIRES_IN || '24h',
+  jwtRefreshExpiresIn: process.env.JWT_REFRESH_EXPIRES_IN || '7d',
 
   // Redis Configuration
   redisUrl: process.env.REDIS_URL,
@@ -80,14 +108,38 @@ const config: EnvironmentConfig = {
   logLevel: process.env.LOG_LEVEL || 'info',
 
   // Rate Limiting Configuration
-  rateLimitWindowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS || '900000', 10), // 15 minutes
-  rateLimitMaxRequests: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS || '100', 10),
+  rateLimitWindowMs: process.env.RATE_LIMIT_WINDOW_MS || '900000', // 15 minutes
+  rateLimitMax: process.env.RATE_LIMIT_MAX || '100',
+  rateLimitSkipSuccessful: process.env.RATE_LIMIT_SKIP_SUCCESSFUL || 'false',
+  skipRateLimitInDev: process.env.SKIP_RATE_LIMIT_IN_DEV || 'true',
+
+  // Auth Rate Limiting
+  authRateLimitWindowMs: process.env.AUTH_RATE_LIMIT_WINDOW_MS || '900000', // 15 minutes
+  authRateLimitMax: process.env.AUTH_RATE_LIMIT_MAX || '10',
 
   // Session Configuration
   sessionSecret: process.env.SESSION_SECRET || 'your-session-secret-change-this-in-production',
 
   // CORS Configuration
+  corsOrigin: process.env.CORS_ORIGIN || 'http://localhost:3000',
   allowedOrigins: process.env.ALLOWED_ORIGINS?.split(',') || ['http://localhost:3000'],
+
+  // Security Configuration
+  enableHelmet: process.env.ENABLE_HELMET || 'true',
+  enableCors: process.env.ENABLE_CORS || 'true',
+  trustProxy: process.env.TRUST_PROXY || 'false',
+
+  // API Versioning
+  defaultApiVersion: process.env.DEFAULT_API_VERSION || 'v1',
+  supportedApiVersions: process.env.SUPPORTED_API_VERSIONS?.split(',') || ['v1', 'v2'],
+
+  // Internationalization
+  defaultLanguage: process.env.DEFAULT_LANGUAGE || 'en',
+  supportedLanguages: process.env.SUPPORTED_LANGUAGES?.split(',') || ['en', 'es', 'fr', 'de'],
+
+  // Audit Configuration
+  enableAuditLog: process.env.ENABLE_AUDIT_LOG || 'true',
+  auditLogRetentionDays: parseInt(process.env.AUDIT_LOG_RETENTION_DAYS || '90', 10),
 
   // Job Configuration
   enableJobs: process.env.ENABLE_JOBS || 'true',
