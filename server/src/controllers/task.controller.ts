@@ -93,6 +93,21 @@ export const deleteTask = asyncHandler(async (req: AuthRequest, res: Response, n
 })
 
 /**
+ * @desc    Get task analytics
+ * @route   GET /api/v1/tasks/analytics
+ * @access  Private
+ */
+export const getTaskAnalytics = asyncHandler(async (req: AuthRequest, res: Response, next: NextFunction) => {
+  const userId = req.user?.id as string
+  const analytics = await taskService.getTaskStats(req.query, {
+    userId,
+    timestamp: new Date()
+  })
+
+  successResponse(res, 200, analytics, "Task analytics retrieved successfully")
+})
+
+/**
  * @desc    Get task statistics
  * @route   GET /api/v1/tasks/stats
  * @access  Private
@@ -129,6 +144,50 @@ export const getTaskOverview = asyncHandler(async (req: AuthRequest, res: Respon
   })
 
   successResponse(res, 200, analytics, "Task overview retrieved successfully")
+})
+
+/**
+ * @desc    Update task status
+ * @route   PATCH /api/v1/tasks/:id/status
+ * @access  Private
+ */
+export const updateTaskStatus = asyncHandler(async (req: AuthRequest, res: Response, next: NextFunction) => {
+  const userId = req.user?.id as string
+  const taskId = req.params.id
+  const { status } = req.body
+
+  if (!status || !Object.values(TaskStatus).includes(status)) {
+    throw new ValidationError(`Status must be one of: ${Object.values(TaskStatus).join(", ")}`)
+  }
+
+  const task = await taskService.updateTask(taskId, { status }, {
+    userId,
+    timestamp: new Date()
+  })
+
+  successResponse(res, 200, task, "Task status updated successfully")
+})
+
+/**
+ * @desc    Update task priority
+ * @route   PATCH /api/v1/tasks/:id/priority
+ * @access  Private
+ */
+export const updateTaskPriority = asyncHandler(async (req: AuthRequest, res: Response, next: NextFunction) => {
+  const userId = req.user?.id as string
+  const taskId = req.params.id
+  const { priority } = req.body
+
+  if (!priority || !['low', 'medium', 'high', 'urgent'].includes(priority)) {
+    throw new ValidationError("Priority must be one of: low, medium, high, urgent")
+  }
+
+  const task = await taskService.updateTask(taskId, { priority }, {
+    userId,
+    timestamp: new Date()
+  })
+
+  successResponse(res, 200, task, "Task priority updated successfully")
 })
 
 /**

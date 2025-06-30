@@ -483,6 +483,38 @@ export const getProjects = [
 ]
 
 /**
+ * Validation rules for getting project tasks
+ */
+export const getProjectTasks = [
+  validateUuidParam("id", "Invalid project ID"),
+  ...validatePagination,
+  validateSort(["title", "createdAt", "updatedAt", "dueDate", "startDate", "status", "priority", "assignedTo"]),
+
+  query("status")
+    .optional()
+    .isIn(["todo", "in_progress", "review", "done", "cancelled"])
+    .withMessage("Status must be one of: todo, in_progress, review, done, cancelled"),
+
+  query("priority")
+    .optional()
+    .isIn(["low", "medium", "high", "urgent"])
+    .withMessage("Priority must be one of: low, medium, high, urgent"),
+
+  query("assignedTo")
+    .optional()
+    .isUUID()
+    .withMessage("Assigned to must be a valid UUID"),
+
+  query("search")
+    .optional()
+    .isString()
+    .withMessage("Search must be a string")
+    .trim()
+    .isLength({ min: 1, max: 100 })
+    .withMessage("Search term must be between 1 and 100 characters"),
+]
+
+/**
  * Validation rules for getting project statistics
  */
 export const getProjectStats = [

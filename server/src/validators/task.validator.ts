@@ -668,6 +668,32 @@ export const updateTaskStatus = [
 ]
 
 /**
+ * Validation rules for updating task priority
+ */
+export const updateTaskPriority = [
+  validateUuidParam("id", "Invalid task ID"),
+
+  body("priority")
+    .notEmpty()
+    .withMessage("Priority is required")
+    .isIn(taskPriorityValues)
+    .withMessage(`Priority must be one of: ${taskPriorityValues.join(", ")}`),
+
+  body("reason")
+    .optional()
+    .isString()
+    .withMessage("Reason must be a string")
+    .trim()
+    .isLength({ max: 500 })
+    .withMessage("Reason cannot exceed 500 characters"),
+
+  body("notifyAssignee")
+    .optional()
+    .isBoolean()
+    .withMessage("Notify assignee must be a boolean"),
+]
+
+/**
  * Validation rules for assigning a task
  */
 export const assignTask = [

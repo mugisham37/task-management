@@ -10,6 +10,13 @@ import feedbackRoutes from "./feedback.routes";
 import healthRoutes from "./health.routes";
 import invitationRoutes from "./invitation.routes";
 import notificationRoutes from "./notification.routes";
+import projectRoutes from "./project.routes";
+import recurringTaskRoutes from "./recurring-task.routes";
+import taskTemplateRoutes from "./task-template.routes";
+import taskRoutes from "./task.routes";
+import teamRoutes from "./team.routes";
+import userRoutes from "./user.routes";
+import workspaceRoutes from "./workspace.routes";
 
 const router = Router();
 
@@ -28,6 +35,13 @@ router.use(`${API_VERSION}/feedback`, feedbackRoutes);
 router.use("/health", healthRoutes);
 router.use(`${API_VERSION}/invitations`, invitationRoutes);
 router.use(`${API_VERSION}/notifications`, notificationRoutes);
+router.use(`${API_VERSION}/projects`, projectRoutes);
+router.use(`${API_VERSION}/recurring-tasks`, recurringTaskRoutes);
+router.use(`${API_VERSION}/task-templates`, taskTemplateRoutes);
+router.use(`${API_VERSION}/tasks`, taskRoutes);
+router.use(`${API_VERSION}/teams`, teamRoutes);
+router.use(`${API_VERSION}/users`, userRoutes);
+router.use(`${API_VERSION}/workspaces`, workspaceRoutes);
 
 // API documentation route
 router.get("/", (req, res) => {
@@ -47,6 +61,13 @@ router.get("/", (req, res) => {
       health: "/health",
       invitations: `${API_VERSION}/invitations`,
       notifications: `${API_VERSION}/notifications`,
+      projects: `${API_VERSION}/projects`,
+      recurringTasks: `${API_VERSION}/recurring-tasks`,
+      taskTemplates: `${API_VERSION}/task-templates`,
+      tasks: `${API_VERSION}/tasks`,
+      teams: `${API_VERSION}/teams`,
+      users: `${API_VERSION}/users`,
+      workspaces: `${API_VERSION}/workspaces`,
     },
     documentation: "/api-docs",
     timestamp: new Date().toISOString(),

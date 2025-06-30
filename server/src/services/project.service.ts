@@ -2,6 +2,7 @@ import { eq, and, or, desc, asc, count, ilike, isNull, isNotNull, gte, lte, inAr
 import { BaseService, ServiceContext, NotFoundError, ValidationError, ForbiddenError } from './base.service';
 import { projectRepository, userRepository, taskRepository, notificationRepository } from '../db/repositories';
 import { Project, NewProject } from '../db/schema/projects';
+import { tasks as tasksSchema } from '../db/schema/tasks';
 import { PaginationOptions, PaginatedResult } from '../db/repositories/base/interfaces';
 
 export interface ProjectFilters {
@@ -188,7 +189,7 @@ export class ProjectService extends BaseService {
 
       // Check if project has tasks
       const projectTasks = await taskRepository.findMany({
-        where: eq(taskRepository['table']?.projectId, id),
+        where: eq(tasksSchema.projectId, id),
         limit: 1
       });
 
@@ -223,7 +224,7 @@ export class ProjectService extends BaseService {
 
       // Get all tasks for this project
       const allTasks = await taskRepository.findMany({
-        where: eq(taskRepository['table']?.projectId, id),
+        where: eq(tasksSchema.projectId, id),
         limit: 10000 // Large limit to get all tasks
       });
 
@@ -247,6 +248,68 @@ export class ProjectService extends BaseService {
       return stats;
     } catch (error) {
       this.handleError(error, 'getProjectStats', ctx);
+    }
+  }
+
+  // Get Project Tasks
+  async getProjectTasks(
+    id: string, 
+    filters: any = {}, 
+    context?: ServiceContext
+  ): Promise<any> {
+    const ctx = this.createContext(context);
+    this.logOperation('getProjectTasks', ctx, { projectId: id, filters });
+
+    try {
+      const project = await projectRepository.findById(id);
+      if (!project) {
+        throw new NotFoundError('Project', id);
+      }
+
+      // Check access permissions
+      await this.verifyProjectAccess(project, ctx.userId!);
+
+      // Build pagination options
+      const paginationOptions = this.validatePagination({
+        page: filters.page ? parseInt(filters.page) : 1,
+        limit: filters.limit ? parseInt(filters.limit) : 10
+      });
+
+      // Build where conditions for tasks
+      const whereConditions = [];
+      
+      // Add project filter
+      whereConditions.push(eq(tasksSchema.projectId, id));
+
+      // Add additional filters
+      if (filters.status) {
+        whereConditions.push(eq(tasksSchema.status, filters.status));
+      }
+      if (filters.priority) {
+        whereConditions.push(eq(tasksSchema.priority, filters.priority));
+      }
+      if (filters.assignedTo) {
+        whereConditions.push(eq(tasksSchema.assigneeId, filters.assignedTo));
+      }
+      if (filters.search) {
+        const searchCondition = or(
+          ilike(tasksSchema.title, `%${filters.search}%`),
+          ilike(tasksSchema.description, `%${filters.search}%`)
+        );
+        if (searchCondition) {
+          whereConditions.push(searchCondition);
+        }
+      }
+
+      const result = await taskRepository.findMany({
+        ...paginationOptions,
+        where: whereConditions.length > 1 ? and(...whereConditions) : whereConditions[0],
+        orderBy: [desc(tasksSchema.createdAt)]
+      });
+
+      return result;
+    } catch (error) {
+      this.handleError(error, 'getProjectTasks', ctx);
     }
   }
 

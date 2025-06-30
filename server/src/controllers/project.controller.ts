@@ -200,3 +200,33 @@ export const cancelProject = asyncHandler(async (req: AuthRequest, res: Response
 
   successResponse(res, 200, project, "Project cancelled successfully");
 });
+
+/**
+ * @desc    Get project tasks
+ * @route   GET /api/v1/projects/:id/tasks
+ * @access  Private
+ */
+export const getProjectTasks = asyncHandler(async (req: AuthRequest, res: Response, next: NextFunction) => {
+  const userId = req.user?.id as string;
+  const projectId = req.params.id;
+  
+  // Add projectId to query filters
+  const queryWithProject = {
+    ...req.query,
+    projectId
+  };
+  
+  const result = await projectService.getProjectTasks(projectId, queryWithProject, { 
+    userId, 
+    timestamp: new Date() 
+  });
+
+  successResponse(res, 200, result.data, "Project tasks retrieved successfully", {
+    total: result.pagination.total,
+    page: result.pagination.page,
+    limit: result.pagination.limit,
+    totalPages: result.pagination.totalPages,
+    hasNext: result.pagination.hasNext,
+    hasPrev: result.pagination.hasPrev,
+  });
+});
