@@ -15,41 +15,53 @@ const RATE_LIMIT_MAX = typeof config.rateLimitMax === 'string'
   ? Number.parseInt(config.rateLimitMax, 10) 
   : config.rateLimitMax || 100; // Default: 100 requests per window
 
-// Create Redis client for rate limiting if Redis URL is provided
+// Create Redis client for rate limiting if Redis URL is provided and Redis is enabled
 let redisClient: any;
-let store: any;
 
-if (config.redisUrl) {
+// Function to create a Redis store with unique prefix
+const createRedisStore = (prefix: string) => {
+  if (!config.redisUrl || !config.useRedis || config.disableCache === "true") {
+    return undefined;
+  }
+
+  if (!redisClient) {
+    try {
+      redisClient = createClient({
+        url: config.redisUrl,
+      });
+
+      redisClient.on("error", (err: Error) => {
+        logger.error("Redis client error:", err);
+      });
+
+      redisClient.on("connect", () => {
+        logger.info("Redis client connected for rate limiting");
+      });
+
+      redisClient.on("disconnect", () => {
+        logger.warn("Redis client disconnected");
+      });
+
+      // Connect to Redis
+      redisClient.connect().catch((error: Error) => {
+        logger.error("Failed to connect to Redis:", error);
+      });
+    } catch (error) {
+      logger.error("Failed to initialize Redis for rate limiting:", error);
+      return undefined;
+    }
+  }
+
   try {
-    redisClient = createClient({
-      url: config.redisUrl,
-    });
-
-    redisClient.on("error", (err: Error) => {
-      logger.error("Redis client error:", err);
-    });
-
-    redisClient.on("connect", () => {
-      logger.info("Redis client connected for rate limiting");
-    });
-
-    redisClient.on("disconnect", () => {
-      logger.warn("Redis client disconnected");
-    });
-
-    // Connect to Redis
-    redisClient.connect().catch((error: Error) => {
-      logger.error("Failed to connect to Redis:", error);
-    });
-
-    // Create Redis store for rate limiting
-    store = new RedisStore({
+    return new RedisStore({
       sendCommand: (...args: string[]) => redisClient.sendCommand(args),
+      prefix: `rate-limit:${prefix}:`,
     });
   } catch (error) {
-    logger.error("Failed to initialize Redis for rate limiting:", error);
+    logger.error(`Failed to create Redis store for ${prefix}:`, error);
+    return undefined;
   }
-}
+};
 
 /**
  * General rate limiter for API endpoints
@@ -59,7 +71,7 @@ export const apiLimiter = rateLimit({
   max: RATE_LIMIT_MAX,
   standardHeaders: true,
   legacyHeaders: false,
-  store: store || undefined,
+  store: createRedisStore("api"),
   message: {
     success: false,
     message: "Too many requests from this IP, please try again later",
@@ -98,7 +110,7 @@ export const authLimiter = rateLimit({
     : Number.parseInt(config.authRateLimitMax || "5", 10), // 5 requests per window
   standardHeaders: true,
   legacyHeaders: false,
-  store: store || undefined,
+  store: createRedisStore("auth"),
   message: {
     success: false,
     message: "Too many authentication attempts, please try again later",
@@ -117,7 +129,7 @@ export const passwordResetLimiter = rateLimit({
   max: 3, // Limit each IP to 3 password reset requests per hour
   standardHeaders: true,
   legacyHeaders: false,
-  store: store || undefined,
+  store: createRedisStore("password-reset"),
   message: {
     success: false,
     message: "Too many password reset attempts, please try again later",
@@ -135,7 +147,7 @@ export const emailVerificationLimiter = rateLimit({
   max: 5, // Limit each IP to 5 email verification requests per hour
   standardHeaders: true,
   legacyHeaders: false,
-  store: store || undefined,
+  store: createRedisStore("email-verification"),
   message: {
     success: false,
     message: "Too many email verification attempts, please try again later",
@@ -153,7 +165,7 @@ export const uploadLimiter = rateLimit({
   max: 20, // Limit each IP to 20 upload requests per windowMs
   standardHeaders: true,
   legacyHeaders: false,
-  store: store || undefined,
+  store: createRedisStore("upload"),
   message: {
     success: false,
     message: "Too many upload attempts, please try again later",
@@ -174,7 +186,7 @@ export const searchLimiter = rateLimit({
   max: 30, // Limit each IP to 30 search requests per minute
   standardHeaders: true,
   legacyHeaders: false,
-  store: store || undefined,
+  store: createRedisStore("search"),
   message: {
     success: false,
     message: "Too many search requests, please try again later",
@@ -195,7 +207,7 @@ export const exportLimiter = rateLimit({
   max: 10, // Limit each IP to 10 export requests per hour
   standardHeaders: true,
   legacyHeaders: false,
-  store: store || undefined,
+  store: createRedisStore("export"),
   message: {
     success: false,
     message: "Too many export requests, please try again later",
@@ -224,7 +236,7 @@ export const createRateLimiter = (options: {
     max: options.max,
     standardHeaders: true,
     legacyHeaders: false,
-    store: store || undefined,
+    store: createRedisStore(options.keyPrefix || "custom"),
     message: {
       success: false,
       message: options.message || "Too many requests, please try again later",
@@ -272,7 +284,7 @@ export const dynamicRateLimiter = (req: Request, res: Response, next: NextFuncti
     max: maxRequests,
     standardHeaders: true,
     legacyHeaders: false,
-    store: store || undefined,
+    store: createRedisStore("dynamic"),
     message: {
       success: false,
       message: "Rate limit exceeded for your user level",
@@ -298,14 +310,14 @@ export const apiComplexityLimiter = (complexity: 'low' | 'medium' | 'high') => {
     high: { windowMs: 15 * 60 * 1000, max: 10 }, // 15 minutes, 10 requests
   };
 
-  const config = limits[complexity];
+  const limitConfig = limits[complexity];
 
   return rateLimit({
-    windowMs: config.windowMs,
-    max: config.max,
+    windowMs: limitConfig.windowMs,
+    max: limitConfig.max,
     standardHeaders: true,
     legacyHeaders: false,
-    store: store || undefined,
+    store: createRedisStore(`complexity-${complexity}`),
     message: {
       success: false,
       message: `Too many ${complexity} complexity requests, please try again later`,

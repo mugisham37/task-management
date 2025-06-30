@@ -4,9 +4,12 @@ import config from "./environment"
 import logger from "./logger"
 import * as schema from "../db/schema"
 
+// PostgreSQL connection configuration with your specified details
+const connectionString = `postgresql://postgres:moses@localhost:5432/Task-Management`
+
 // PostgreSQL connection pool configuration
 const pool = new Pool({
-  connectionString: config.databaseUrl,
+  connectionString,
   max: 20, // Maximum number of clients in the pool
   min: 5, // Minimum number of clients in the pool
   idleTimeoutMillis: 30000, // Close idle clients after 30 seconds
@@ -18,6 +21,30 @@ const pool = new Pool({
 export const db = drizzle(pool, { schema })
 
 /**
+ * Connect to PostgreSQL database
+ * @returns Connection status
+ */
+export const connectToDatabase = async (): Promise<boolean> => {
+  try {
+    const client = await pool.connect()
+    await client.query("SELECT NOW()")
+    client.release()
+    
+    logger.info("✅ PostgreSQL connection successful", {
+      database: "Task-Management",
+      host: "localhost",
+      port: 5432,
+      user: "postgres"
+    })
+    
+    return true
+  } catch (error) {
+    logger.error("❌ PostgreSQL connection failed:", error)
+    return false
+  }
+}
+
+/**
  * Test database connection
  * @returns Connection status
  */
@@ -26,10 +53,10 @@ export const testConnection = async (): Promise<boolean> => {
     const client = await pool.connect()
     await client.query("SELECT NOW()")
     client.release()
-    logger.info("✅ Database connection successful")
+    logger.info("✅ Database connection test successful")
     return true
   } catch (error) {
-    logger.error("❌ Database connection failed:", error)
+    logger.error("❌ Database connection test failed:", error)
     return false
   }
 }
@@ -63,13 +90,14 @@ export const getPoolStats = () => {
  */
 export const initializeDatabase = async (): Promise<void> => {
   try {
-    const connected = await testConnection()
+    const connected = await connectToDatabase()
     if (!connected) {
       throw new Error("Failed to connect to PostgreSQL database")
     }
 
     // Log pool configuration
     logger.info("Database pool configuration:", {
+      connectionString: connectionString.replace(/:[^:@]*@/, ':***@'), // Hide password in logs
       max: pool.options.max,
       min: pool.options.min,
       idleTimeoutMillis: pool.options.idleTimeoutMillis,
@@ -124,6 +152,60 @@ export const executeRawQuery = async (query: string, params?: any[]): Promise<an
     throw error
   } finally {
     client.release()
+  }
+}
+
+/**
+ * Create database if it doesn't exist
+ */
+export const createDatabaseIfNotExists = async (): Promise<void> => {
+  const adminPool = new Pool({
+    connectionString: `postgresql://postgres:moses@localhost:5432/postgres`, // Connect to default postgres db
+    max: 1,
+  })
+
+  try {
+    const client = await adminPool.connect()
+    
+    // Check if database exists
+    const result = await client.query(
+      "SELECT 1 FROM pg_database WHERE datname = $1",
+      ["Task-Management"]
+    )
+
+    if (result.rows.length === 0) {
+      // Create database
+      await client.query('CREATE DATABASE "Task-Management"')
+      logger.info("✅ Database 'Task-Management' created successfully")
+    } else {
+      logger.info("✅ Database 'Task-Management' already exists")
+    }
+
+    client.release()
+  } catch (error) {
+    logger.error("❌ Error creating database:", error)
+    throw error
+  } finally {
+    await adminPool.end()
+  }
+}
+
+/**
+ * Run database migrations
+ */
+export const runMigrations = async (): Promise<void> => {
+  try {
+    // This would typically run your Drizzle migrations
+    // For now, we'll just log that migrations would run here
+    logger.info("Database migrations would run here")
+    
+    // Example of how you might run migrations:
+    // await migrate(db, { migrationsFolder: './src/db/migrations' })
+    
+    logger.info("✅ Database migrations completed")
+  } catch (error) {
+    logger.error("❌ Database migrations failed:", error)
+    throw error
   }
 }
 

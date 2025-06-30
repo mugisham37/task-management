@@ -8,7 +8,7 @@ export default {
   out: './src/db/migrations',
   driver: 'pg',
   dbCredentials: {
-    connectionString: process.env.DATABASE_URL || 'postgresql://postgres:password@localhost:5432/taskmanagement',
+    connectionString: process.env.DATABASE_URL || 'postgresql://postgres:moses@localhost:5432/Task-Management',
   },
   verbose: true,
   strict: true,

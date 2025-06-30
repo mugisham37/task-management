@@ -1,8 +1,8 @@
 import dotenv from "dotenv"
 import path from "path"
 
-// Load environment variables from .env file
-dotenv.config()
+// Load environment variables from .env file in the project root
+dotenv.config({ path: path.resolve(process.cwd(), '../.env') })
 
 interface EnvironmentConfig {
   // Server Configuration
