@@ -1,8 +1,19 @@
 import type { Response, NextFunction } from "express"
 import { asyncHandler } from "../utils/async-handler"
 import { successResponse } from "../utils/response-formatter"
-import { calendarEventService } from "../services"
+import { calendarEventService, calendarService } from "../services"
 import type { AuthRequest } from "../middleware/auth.middleware"
+import { validate } from "../middleware/validate.middleware"
+import { calendarValidators } from "../validators"
+
+// Validation middleware exports for use in routes
+export const validateCreateCalendarEvent = validate(calendarValidators.createCalendarEvent)
+export const validateUpdateCalendarEvent = validate(calendarValidators.updateCalendarEvent)
+export const validateGetCalendarEvent = validate(calendarValidators.getCalendarEvent)
+export const validateDeleteCalendarEvent = validate(calendarValidators.deleteCalendarEvent)
+export const validateGetCalendarEvents = validate(calendarValidators.getCalendarEvents)
+export const validateGetCalendarEventStats = validate(calendarValidators.getCalendarEventStats)
+export const validateProcessEventReminders = validate(calendarValidators.processEventReminders)
 
 /**
  * @desc    Create a new calendar event
@@ -107,4 +118,21 @@ export const getCalendarEventStats = asyncHandler(async (req: AuthRequest, res: 
   })
 
   successResponse(res, 200, stats, "Calendar event statistics retrieved successfully")
+})
+
+/**
+ * @desc    Process event reminders manually
+ * @route   POST /api/v1/calendar/reminders/process
+ * @access  Private (Admin only)
+ */
+export const processEventReminders = asyncHandler(async (req: AuthRequest, res: Response, next: NextFunction) => {
+  const userId = req.user?.id as string
+  
+  // Process event reminders using the calendar service
+  const remindersSent = await calendarService.processEventReminders({ 
+    userId, 
+    timestamp: new Date() 
+  })
+
+  successResponse(res, 200, { remindersSent }, "Event reminders processed successfully")
 })

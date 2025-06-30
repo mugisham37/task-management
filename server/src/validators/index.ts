@@ -17,6 +17,9 @@ export * as authValidators from './auth.validator';
 // Calendar event validators
 export * as calendarEventValidators from './calendar-event.validator';
 
+// Calendar validators (combined calendar event and calendar service validators)
+export * as calendarValidators from './calendar.validator';
+
 // Comment validators
 export * as commentValidators from './comment.validator';
 
@@ -91,6 +94,17 @@ export {
   removeEventReminders,
   getUserCalendarEvents,
 } from './calendar-event.validator';
+
+export {
+  // Calendar validators (combined calendar event and calendar service validators)
+  createCalendarEvent as createCalendarEventValidator,
+  updateCalendarEvent as updateCalendarEventValidator,
+  getCalendarEvent as getCalendarEventValidator,
+  deleteCalendarEvent as deleteCalendarEventValidator,
+  getCalendarEvents as getCalendarEventsValidator,
+  getCalendarEventStats as getCalendarEventStatsValidator,
+  processEventReminders as processEventRemindersValidator,
+} from './calendar.validator';
 
 export {
   // Comment validators
