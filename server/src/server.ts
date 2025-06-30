@@ -11,6 +11,7 @@ import { testConnection, closeConnection } from './db/connection';
 import { logger } from './utils/logger';
 import { errorHandler } from './middleware/errorHandler';
 import { notFoundHandler } from './middleware/notFoundHandler';
+import { initializeJobs, stopJobs } from './jobs';
 
 // Import routes
 import authRoutes from './routes/auth';
@@ -136,8 +137,16 @@ const gracefulShutdown = async (signal: string) => {
     logger.info('HTTP server closed');
     
     try {
+      // Stop background jobs first
+      logger.info('Stopping background jobs...');
+      stopJobs();
+      logger.info('Background jobs stopped');
+      
+      // Close database connections
       await closeConnection();
       logger.info('Database connections closed');
+      
+      logger.info('Graceful shutdown completed successfully');
       process.exit(0);
     } catch (error) {
       logger.error('Error during graceful shutdown:', error);
@@ -170,6 +179,16 @@ const startServer = async () => {
       logger.info(`🚀 Server running on port ${PORT} in ${NODE_ENV} mode`);
       logger.info(`📊 Health check available at http://localhost:${PORT}/health`);
       logger.info(`🔌 Socket.IO server running`);
+      
+      // Initialize background jobs after server starts
+      try {
+        initializeJobs();
+        logger.info('✅ Background jobs initialized successfully');
+      } catch (error) {
+        logger.error('❌ Failed to initialize background jobs:', error);
+        // Don't exit the server if jobs fail to initialize
+        // The server can still function without background jobs
+      }
     });
   } catch (error) {
     logger.error('Failed to start server:', error);
