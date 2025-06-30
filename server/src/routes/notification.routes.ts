@@ -5,7 +5,7 @@ import {
   markAllNotificationsAsRead,
   deleteNotification,
 } from "../controllers/notification.controller"
-import { authenticate } from "../middleware/auth.middleware"
+import { authenticate } from "../middleware/auth"
 import { validate } from "../middleware/validate.middleware"
 import { notificationValidators } from "../validators"
 

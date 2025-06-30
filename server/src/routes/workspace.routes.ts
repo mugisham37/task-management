@@ -1,6 +1,6 @@
 import express from "express"
 import { validate } from "../middleware/validate.middleware"
-import { authenticate } from "../middleware/auth.middleware"
+import { authenticate } from "../middleware/auth"
 import { workspaceValidators, activityValidators } from "../validators"
 import * as workspaceController from "../controllers/workspace.controller"
 import * as activityController from "../controllers/activity.controller"

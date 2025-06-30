@@ -1,6 +1,6 @@
 import express from "express"
 import { validate } from "../middleware/validate.middleware"
-import { authenticate } from "../middleware/auth.middleware"
+import { authenticate } from "../middleware/auth"
 import { taskValidators, commentValidators, activityValidators } from "../validators"
 import * as taskController from "../controllers/task.controller"
 import * as commentController from "../controllers/comment.controller"

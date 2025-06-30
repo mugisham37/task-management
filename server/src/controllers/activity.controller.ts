@@ -2,7 +2,7 @@ import type { Response, NextFunction } from "express";
 import { asyncHandler } from "../utils/async-handler";
 import { successResponse } from "../utils/response-formatter";
 import { activityService } from "../services";
-import type { AuthRequest } from "../middleware/auth.middleware";
+import type { AuthRequest } from "../middleware/auth";
 
 /**
  * @desc    Get activities for the authenticated user

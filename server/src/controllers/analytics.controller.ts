@@ -2,7 +2,7 @@ import type { Request, Response } from "express"
 import { asyncHandler } from "../utils/async-handler"
 import { responseFormatter } from "../utils/response-formatter"
 import { analyticsService } from "../services/analytics.service"
-import type { AuthRequest } from "../middleware/auth.middleware"
+import type { AuthRequest } from "../middleware/auth"
 
 /**
  * Get task analytics

@@ -1,28 +1,24 @@
-// Enhanced middleware exports (primary)
-export * from "./auth.enhanced";
-export * from "./audit-log.enhanced";
+// Primary middleware exports
+export * from "./auth";
+export * from "./validate.middleware";
 export * from "./error.middleware";
-export * from "./rate-limit.enhanced";
-export * from "./upload.enhanced";
-export * from "./validate.enhanced";
+export * from "./rate-limiter.middleware";
+export * from "./upload.middleware";
+export * from "./audit-log.middleware";
 
-// Legacy middleware exports for backward compatibility (selective)
-export type { AuthenticatedRequest } from "./auth";
+// Legacy middleware exports for backward compatibility
 export { createError, asyncHandler } from "./errorHandler";
 export { notFoundHandler } from "./notFoundHandler";
-export { apiLimiter, authLimiter } from "./rate-limiter.middleware";
-export { upload as legacyUpload } from "./upload.middleware";
-export { validate as legacyValidate } from "./validate.middleware";
 
 // Re-export commonly used middleware with better names
-export { authenticate as auth } from "./auth.enhanced";
-export { authorize } from "./auth.enhanced";
-export { optionalAuth } from "./auth.enhanced";
+export { authenticate as auth } from "./auth";
+export { authorize } from "./auth";
+export { optionalAuth } from "./auth";
 export { errorHandler } from "./error.middleware";
-export { validate } from "./validate.enhanced";
-export { auditLogMiddleware as auditLog } from "./audit-log.enhanced";
-export { rateLimiter } from "./rate-limit.enhanced";
-export { attachmentUpload as upload } from "./upload.enhanced";
+export { validate } from "./validate.middleware";
+export { auditLogMiddleware as auditLog } from "./audit-log.middleware";
+export { apiLimiter as rateLimiter, authLimiter } from "./rate-limiter.middleware";
+export { upload } from "./upload.middleware";
 
 // Middleware composition utilities
 import type { Request, Response, NextFunction } from "express";

@@ -1,5 +1,5 @@
 import express from "express"
-import { authenticate } from "../middleware/auth.middleware"
+import { authenticate } from "../middleware/auth"
 import * as analyticsController from "../controllers/analytics.controller"
 
 const router = express.Router()

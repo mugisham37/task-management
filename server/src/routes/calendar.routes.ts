@@ -1,6 +1,6 @@
 import express from "express"
 import { validate } from "../middleware/validate.middleware"
-import { authenticate } from "../middleware/auth.middleware"
+import { authenticate } from "../middleware/auth"
 import * as calendarController from "../controllers/calendar.controller"
 import { calendarValidators } from "../validators"
 

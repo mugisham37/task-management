@@ -11,7 +11,7 @@ import {
 import { validate } from "@/middleware/validate.middleware"
 import { authLimiter } from "@/middleware/rate-limiter.middleware"
 import { authValidators } from "@/validators"
-import { authenticate } from "@/middleware/auth.middleware"
+import { authenticate } from "@/middleware/auth"
 
 const router = Router()
 

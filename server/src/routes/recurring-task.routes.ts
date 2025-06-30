@@ -1,6 +1,6 @@
 import express from "express"
 import { validate } from "../middleware/validate.middleware"
-import { authenticate } from "../middleware/auth.middleware"
+import { authenticate } from "../middleware/auth"
 import * as recurringTaskController from "../controllers/recurring-task.controller"
 import { recurringTaskValidators } from "../validators"
 

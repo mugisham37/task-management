@@ -1,6 +1,6 @@
 import express from "express"
 import * as healthController from "../controllers/health.controller"
-import { authenticate } from "../middleware/auth.middleware"
+import { authenticate } from "../middleware/auth"
 
 const router = express.Router()
 

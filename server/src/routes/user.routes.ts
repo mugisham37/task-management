@@ -1,6 +1,6 @@
 import { Router } from "express"
 import { getProfile, updateProfile, deleteProfile } from "@/controllers/user.controller"
-import { authenticate } from "@/middleware/auth.middleware"
+import { authenticate } from "@/middleware/auth"
 import { validate } from "@/middleware/validate.middleware"
 import { authValidators } from "@/validators"
 

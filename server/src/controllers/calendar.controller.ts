@@ -2,7 +2,7 @@ import type { Response, NextFunction } from "express"
 import { asyncHandler } from "../utils/async-handler"
 import { successResponse } from "../utils/response-formatter"
 import { calendarEventService, calendarService } from "../services"
-import type { AuthRequest } from "../middleware/auth.middleware"
+import type { AuthRequest } from "../middleware/auth"
 import { validate } from "../middleware/validate.middleware"
 import { calendarValidators } from "../validators"
 
