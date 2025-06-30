@@ -16,3 +16,6 @@ export interface AuthRequest extends Request {
 
 // Re-export the authenticate middleware from auth.ts for consistency
 export { authenticate, authorize, optionalAuth } from './auth';
+
+// Add auth alias for backward compatibility
+export { authenticate as auth } from './auth';

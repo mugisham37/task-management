@@ -1,5 +1,22 @@
 // Task Controller
-export * from './task.controller';
+export {
+  getTasks,
+  createTask,
+  getTask,
+  updateTask,
+  deleteTask,
+  getTaskStats,
+  getTaskOverview,
+  updateTaskStatus,
+  updateTaskPriority,
+  addTaskAttachment,
+  removeTaskAttachment,
+  bulkUpdateTaskStatus,
+  bulkAssignTasks,
+  bulkMoveTasks,
+  bulkDeleteTasks,
+  getTaskAnalytics as getTaskAnalyticsFromTask
+} from './task.controller';
 
 // Task Template Controller
 export * from './task-template.controller';
@@ -17,7 +34,12 @@ export * from './team.controller';
 export * from './notification.controller';
 
 // Analytics Controller
-export * from './analytics.controller';
+export {
+  getTaskAnalytics,
+  getProjectAnalytics,
+  getUserProductivityAnalytics,
+  getDashboardAnalytics
+} from './analytics.controller';
 
 // Calendar Controller
 export * from './calendar.controller';
@@ -45,3 +67,9 @@ export * from './recurring-task.controller';
 
 // Workspace Controller
 export * from './workspace.controller';
+
+// Auth Controller
+export * from './auth.controller';
+
+// User Controller
+export * from './user.controller';

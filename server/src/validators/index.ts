@@ -263,3 +263,7 @@ export {
   validateFileSize,
   validateMimeType,
 } from './common.validator';
+
+// Backward compatibility aliases for route files
+// Note: Use the namespace imports above (e.g., teamValidators, invitationValidators, etc.)
+// These are available as: teamValidators.createTeam, invitationValidators.createInvitation, etc.

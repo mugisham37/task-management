@@ -57,3 +57,6 @@ export const throwValidationErrors = (req: Request, res: Response, next: NextFun
   
   next()
 }
+
+// Add validate alias for backward compatibility
+export { validateRequest as validate } from './validation.middleware';

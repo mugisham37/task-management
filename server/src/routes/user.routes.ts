@@ -1,8 +1,8 @@
 import { Router } from "express"
-import { getProfile, updateProfile, deleteProfile } from "../controllers/user.controller"
-import { authenticate } from "../middleware/auth.middleware"
-import { validate } from "../middleware/validation.middleware"
-import { userValidators } from "../validators"
+import { getProfile, updateProfile, deleteProfile } from "@/controllers/user.controller"
+import { authenticate } from "@/middleware/auth.middleware"
+import { validate } from "@/middleware/validate.middleware"
+import { authValidators } from "@/validators"
 
 const router = Router()
 
@@ -224,7 +224,7 @@ router.get("/profile", getProfile)
  *                   type: string
  *                   example: "Email already in use"
  */
-router.put("/profile", validate(userValidators.updateProfile), updateProfile)
+router.put("/profile", validate(authValidators.updateProfile), updateProfile)
 
 /**
  * @swagger
@@ -329,6 +329,6 @@ router.put("/profile", validate(userValidators.updateProfile), updateProfile)
  *                   type: string
  *                   example: "Cannot delete account with active admin roles"
  */
-router.delete("/profile", validate(userValidators.deleteProfile), deleteProfile)
+router.delete("/profile", validate(authValidators.deleteProfile), deleteProfile)
 
 export default router

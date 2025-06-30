@@ -1,13 +1,15 @@
 import express from "express"
 import { validate } from "../middleware/validate.middleware"
-import { auth } from "../middleware/auth.middleware"
-import { teamValidation, invitationValidation, activityValidation } from "../validators"
-import { teamController, invitationController, activityController } from "../controllers"
+import { authenticate } from "../middleware/auth.middleware"
+import { teamValidators, invitationValidators, activityValidators } from "../validators"
+import * as teamController from "../controllers/team.controller"
+import * as invitationController from "../controllers/invitation.controller"
+import * as activityController from "../controllers/activity.controller"
 
 const router = express.Router()
 
 // All routes require authentication
-router.use(auth())
+router.use(authenticate())
 
 /**
  * @swagger
@@ -53,7 +55,7 @@ router.use(auth())
  *       401:
  *         description: Not authenticated
  */
-router.get("/", validate(teamValidation.getTeams), teamController.getTeams)
+router.get("/", validate(teamValidators.getTeams), teamController.getTeams)
 
 /**
  * @swagger
@@ -106,7 +108,7 @@ router.get("/", validate(teamValidation.getTeams), teamController.getTeams)
  *       401:
  *         description: Not authenticated
  */
-router.post("/", validate(teamValidation.createTeam), teamController.createTeam)
+router.post("/", validate(teamValidators.createTeam), teamController.createTeam)
 
 /**
  * @swagger
@@ -146,7 +148,7 @@ router.post("/", validate(teamValidation.createTeam), teamController.createTeam)
  *       401:
  *         description: Not authenticated
  */
-router.get("/:id", validate(teamValidation.getTeam), teamController.getTeam)
+router.get("/:id", validate(teamValidators.getTeam), teamController.getTeam)
 
 /**
  * @swagger
@@ -208,7 +210,7 @@ router.get("/:id", validate(teamValidation.getTeam), teamController.getTeam)
  *       401:
  *         description: Not authenticated
  */
-router.put("/:id", validate(teamValidation.updateTeam), teamController.updateTeam)
+router.put("/:id", validate(teamValidators.updateTeam), teamController.updateTeam)
 
 /**
  * @swagger
@@ -247,7 +249,7 @@ router.put("/:id", validate(teamValidation.updateTeam), teamController.updateTea
  *       401:
  *         description: Not authenticated
  */
-router.delete("/:id", validate(teamValidation.deleteTeam), teamController.deleteTeam)
+router.delete("/:id", validate(teamValidators.deleteTeam), teamController.deleteTeam)
 
 /**
  * @swagger
@@ -291,7 +293,7 @@ router.delete("/:id", validate(teamValidation.deleteTeam), teamController.delete
  *       401:
  *         description: Not authenticated
  */
-router.get("/:id/members", validate(teamValidation.getTeamMembers), teamController.getTeamMembers)
+router.get("/:id/members", validate(teamValidators.getTeamMembers), teamController.getTeamMembers)
 
 /**
  * @swagger
@@ -340,7 +342,7 @@ router.get("/:id/members", validate(teamValidation.getTeamMembers), teamControll
  *       401:
  *         description: Not authenticated
  */
-router.post("/:id/members", validate(teamValidation.addTeamMember), teamController.addTeamMember)
+router.post("/:id/members", validate(teamValidators.addTeamMember), teamController.addTeamMember)
 
 /**
  * @swagger
@@ -383,7 +385,7 @@ router.post("/:id/members", validate(teamValidation.addTeamMember), teamControll
  *       401:
  *         description: Not authenticated
  */
-router.delete("/:id/members/:memberId", validate(teamValidation.removeTeamMember), teamController.removeTeamMember)
+router.delete("/:id/members/:memberId", validate(teamValidators.removeTeamMember), teamController.removeTeamMember)
 
 /**
  * @swagger
@@ -433,7 +435,7 @@ router.delete("/:id/members/:memberId", validate(teamValidation.removeTeamMember
  */
 router.patch(
   "/:id/members/:memberId/role",
-  validate(teamValidation.updateTeamMemberRole),
+  validate(teamValidators.updateTeamMemberRole),
   teamController.updateTeamMemberRole,
 )
 
@@ -472,7 +474,7 @@ router.patch(
  *       401:
  *         description: Not authenticated
  */
-router.delete("/:id/leave", validate(teamValidation.leaveTeam), teamController.leaveTeam)
+router.delete("/:id/leave", validate(teamValidators.leaveTeam), teamController.leaveTeam)
 
 /**
  * @swagger
@@ -516,7 +518,7 @@ router.delete("/:id/leave", validate(teamValidation.leaveTeam), teamController.l
  */
 router.patch(
   "/:id/transfer-ownership",
-  validate(teamValidation.transferTeamOwnership),
+  validate(teamValidators.transferTeamOwnership),
   teamController.transferTeamOwnership,
 )
 
@@ -565,7 +567,7 @@ router.patch(
  */
 router.get(
   "/:teamId/invitations",
-  validate(invitationValidation.getTeamInvitations),
+  validate(invitationValidators.getTeamInvitations),
   invitationController.getTeamInvitations,
 )
 
@@ -621,7 +623,7 @@ router.get(
  *       401:
  *         description: Not authenticated
  */
-router.get("/:teamId/activities", validate(activityValidation.getTeamActivities), activityController.getTeamActivities)
+router.get("/:teamId/activities", validate(activityValidators.getTeamActivities), activityController.getTeamActivities)
 
 /**
  * @swagger
@@ -664,6 +666,6 @@ router.get("/:teamId/activities", validate(activityValidation.getTeamActivities)
  *       401:
  *         description: Not authenticated
  */
-router.get("/:id/stats", validate(teamValidation.getTeamStats), teamController.getTeamStats)
+router.get("/:id/stats", validate(teamValidators.getTeamStats), teamController.getTeamStats)
 
 export default router

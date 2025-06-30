@@ -7,11 +7,11 @@ import {
   resetPassword,
   verifyEmail,
   getCurrentUser,
-} from "../controllers/auth.controller"
-import { validate } from "../middleware/validate.middleware"
-import { authLimiter } from "../middleware/rate-limiter.middleware"
-import { authValidators } from "../validators"
-import { authenticate } from "../middleware/auth.middleware"
+} from "@/controllers/auth.controller"
+import { validate } from "@/middleware/validate.middleware"
+import { authLimiter } from "@/middleware/rate-limiter.middleware"
+import { authValidators } from "@/validators"
+import { authenticate } from "@/middleware/auth.middleware"
 
 const router = Router()
 
